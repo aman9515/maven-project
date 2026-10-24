@@ -51,6 +51,8 @@ pipeline {
             steps {
                 withSonarQubeEnv('SONAR_HOME') {
                     sh '''
+                        set -e
+
                         mvn -B sonar:sonar \
                             -Dsonar.projectKey=maven-project \
                             -Dsonar.projectName=maven-project
@@ -61,27 +63,42 @@ pipeline {
 
         stage('Artifact Upload') {
             steps {
-                echo 'Artifact Upload stage started.'
-
-                echo 'TODO: Configure the JFrog Artifactory upload command and credentials.'
+                echo 'Uploading WAR artifact to JFrog Artifactory.'
 
                 sh '''
+                    set -e
                     test -f target/webapp.war
-                    echo "WAR artifact is ready for upload."
                 '''
+
+                rtUpload(
+                    serverId: 'ARTIFACTORY',
+                    spec: '''{
+                        "files": [
+                            {
+                                "pattern": "target/webapp.war",
+                                "target": "local-snapshot-repo/"
+                            }
+                        ]
+                    }'''
+                )
+
+                echo 'JFrog artifact upload step completed.'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deployment stage started.'
-
-                echo 'TODO: Configure the Tomcat server, deployment credentials, and deployment command.'
+                echo 'Preparing WAR artifact for Tomcat deployment.'
 
                 sh '''
+                    set -e
                     test -f target/webapp.war
-                    echo "WAR artifact is ready for deployment."
+                    ls -lh target/webapp.war
+
+                    echo "WAR file is ready for deployment."
                 '''
+
+                echo 'Tomcat deployment command must be configured for your server.'
             }
         }
     }
@@ -92,7 +109,7 @@ pipeline {
         }
 
         failure {
-            echo 'Pipeline failed. Please check the Jenkins Console Output.'
+            echo 'Pipeline failed. Check the Console Output for the failing stage.'
         }
 
         always {
