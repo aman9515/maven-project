@@ -49,7 +49,7 @@ pipeline {
 
         stage('Code Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
+                withSonarQubeEnv('SONAR_HOME') {
                     sh '''
                         mvn -B sonar:sonar \
                             -Dsonar.projectKey=maven-project \
