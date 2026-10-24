@@ -53,7 +53,7 @@ pipeline {
                     sh '''
                         set -e
 
-                        mvn -B sonar:sonar \
+                        mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar \
                             -Dsonar.projectKey=maven-project \
                             -Dsonar.projectName=maven-project
                     '''
